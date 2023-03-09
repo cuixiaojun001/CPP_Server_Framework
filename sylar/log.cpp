@@ -64,7 +64,7 @@ Logger::Logger(const std::string& name /* = "root" */)
 void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
     if (level >= m_level) {
         auto self = shared_from_this();
-        if(!m_appenders.empty()) {
+        if (!m_appenders.empty()) {
             for (auto& it : m_appenders) {
                 // TODO:使用auto标明一个变量，这个变量永远不会是引用变量。
                 it->log(self, level, event);
@@ -78,6 +78,10 @@ void Logger::warn(LogEvent::ptr event) { log(LogLevel::WARN, event); }
 void Logger::error(LogEvent::ptr event) { log(LogLevel::ERROR, event); }
 void Logger::fatal(LogEvent::ptr event) { log(LogLevel::FATAL, event); }
 void Logger::addAppender(LogAppender::ptr appender) {
+    if(!appender->getFormatter()) {
+        appender->setFormatter(m_formatter);
+    }
+    
     m_appenders.push_back(appender);
 }
 void Logger::delAppender(LogAppender::ptr appender) {
@@ -127,14 +131,15 @@ std::string LogFormatter::format(std::shared_ptr<Logger> logger,
     return ss.str();
 }
 
-std::ostream& LogFormatter::format(std::ostream& ofs,
-                                   std::shared_ptr<Logger> logger,
-                                   LogLevel::Level level, LogEvent::ptr event) {
-    for (auto& i : m_items) {
-        i->format(ofs, logger, level, event);
-    }
-    return ofs;
-}
+// std::ostream& LogFormatter::format(std::ostream& ofs,
+//                                    std::shared_ptr<Logger> logger,
+//                                    LogLevel::Level level, LogEvent::ptr
+//                                    event) {
+//     for (auto& i : m_items) {
+//         i->format(ofs, logger, level, event);
+//     }
+//     return ofs;
+// }
 
 // %xxx %xxx{xxx} %%
 void LogFormatter::init() {
@@ -163,14 +168,14 @@ void LogFormatter::init() {
                 // fmt_status == 0 && m_pattern[n]不是字母也不是{}
                 // 遇到空格或%, 将i后面的字符串到m_pattern[n]之前的这一段形成str
                 str = m_pattern.substr(i + 1, n - i - 1);
-                std::cout << "str:*" << str << std::endl;
+                // std::cout << "str:*" << str << std::endl;
                 break;
             }
             if (fmt_status == 0) {
                 if (m_pattern[n] == '{') {
                     str = m_pattern.substr(
                         i + 1, n - i - 1);  // substr返回子串[pos, pos+count]
-                    std::cout << "str:*" << str << std::endl;
+                    // std::cout << "str:*" << str << std::endl;
                     fmt_status = 1;  // 解析格式
                     fmt_begin = n;
                     ++n;
@@ -179,7 +184,7 @@ void LogFormatter::init() {
             } else if (fmt_status == 1) {
                 if (m_pattern[n] == '}') {
                     fmt = m_pattern.substr(fmt_begin + 1, n - fmt_begin - 1);
-                    std::cout << "fmt:#" << fmt << std::endl;
+                    // std::cout << "fmt:#" << fmt << std::endl;
                     fmt_status = 0;
                     ++n;
                     break;
@@ -218,14 +223,17 @@ void LogFormatter::init() {
     static std::map<std::string,
                     std::function<FormatItem::ptr(const std::string& str)>>
         s_format_items = {
-#define XX(str, C) \
-    {#str, [](const std::string& fmt) { return FormatItem::ptr(new C(fmt));}}\
-    
-            XX(m, MessageFormatItem),   // m:消息
-            XX(p, LevelFormatItem),     // p:日志级别
-            //XX(r, ElapseFormatItem),    // r:累计毫秒数
-            //XX(c, NameFormatItem),      // c:日志名称
-            //XX(t, ThreadIdFormatItem),  // t:线程id
+#define XX(str, C)                                                             \
+    {                                                                          \
+#str,                                                                  \
+            [](const std::string& fmt) { return FormatItem::ptr(new C(fmt)); } \
+    }
+
+            XX(m, MessageFormatItem),  // m:消息
+            XX(p, LevelFormatItem),    // p:日志级别
+            // XX(r, ElapseFormatItem),    // r:累计毫秒数
+            // XX(c, NameFormatItem),      // c:日志名称
+            // XX(t, ThreadIdFormatItem),  // t:线程id
             XX(n, NewLineFormatItem),   // n:换行
             XX(d, DateTimeFormatItem),  // d:时间
             XX(f, FilenameFormatItem),  // f:文件名
@@ -237,7 +245,7 @@ void LogFormatter::init() {
         };
 
     for (auto& i : vec) {
-        if (std::get<2>(i) == 0) { // 非字母
+        if (std::get<2>(i) == 0) {  // 非字母
             m_items.push_back(
                 FormatItem::ptr(new StringFormatItem(std::get<0>(i))));
         } else {
@@ -250,8 +258,9 @@ void LogFormatter::init() {
                 m_items.push_back(it->second(std::get<1>(i)));
             }
         }
-        std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i) << ") - (" << std::get<2>(i) << ")" << std::endl;
+        // std::cout << "(" << std::get<0>(i) << ") - (" << std::get<1>(i)
+        //           << ") - (" << std::get<2>(i) << ")" << std::endl;
     }
-    std::cout << m_items.size() << std::endl;
+    // std::cout << m_items.size() << std::endl;
 }
 }  // namespace sylar
