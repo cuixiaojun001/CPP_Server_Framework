@@ -1,15 +1,21 @@
 #include <iostream>
-#include "../sylar/log.h"
+#include "../sylar/LOG_SYSTEM/Log.h"
+#include "../sylar/LOG_SYSTEM/util.h""
 
 int main(int argc, char** agrv) {
     sylar::Logger::ptr logger(new sylar::Logger);
     
     logger->addAppender(sylar::LogAppender::ptr (new sylar::StdoutLogAppender));
 
-    sylar::LogEvent::ptr event(new sylar::LogEvent(logger, logger->getLevel() , __FILE__, __LINE__, 0, 1, 2, time(0), "123"));
+    // sylar::LogEvent::ptr event(new sylar::LogEvent(logger, logger->getLevel() , __FILE__, __LINE__, 0, sylar::GetThreadId(), sylar::GetFiberId(), time(0), "123"));
     // event->getSS() << "Hello sylar log";
 
-    logger->log(sylar::LogLevel::DEBUG, event);
+    // logger->log(sylar::LogLevel::DEBUG, event);
     // std::cout << "hello sylar log" << std::endl;
+
+    SYLAR_LOG_DEBUG(logger) << "test macro";
+
+    auto l = sylar::LoggerMgr::GetInstance()->getLogger("xx");
+    SYLAR_LOG_INFO(l) << "xxx";
 
 }

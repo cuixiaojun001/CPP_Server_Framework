@@ -1,5 +1,5 @@
 // 防御式声明
-// #ifdef __SYLAR_LOG_H__
+#ifndef __SYLAR_LOG_H__
 #define __SYLAR_LOG_H__
 
 #include <stdint.h>
@@ -13,6 +13,22 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "singleton.h"
+
+#define SYLAR_LOG_LEVEL(logger, level)                                  \
+    if (logger->getLevel() <= level)                                    \
+    sylar::LogEventWrap(                                                \
+        sylar::LogEvent::ptr(new sylar::LogEvent(                       \
+            logger, level, __FILE__, __LINE__, 0, sylar::GetThreadId(), \
+            sylar::GetFiberId(), time(0), "123")))                      \
+        .getSS()
+
+#define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
+#define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::INFO)
+#define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::WARN)
+#define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::ERROR)
+#define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::FATAL)
 
 namespace sylar {
 class Logger;
@@ -69,6 +85,7 @@ class LogEvent {
      * @param[in] thread_id 线程ID
      * @param[in] fiber_id 协程ID
      * @param[in] time 日志时间(秒)
+     * @param[in] thread_name 线程名称
      */
     LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
              const char* file, int32_t line, uint32_t elapse,
@@ -122,6 +139,39 @@ class LogEvent {
     uint64_t m_time = 0;
     /// 线程名称
     std::string m_threadName;
+};
+
+/**
+ * @brief 日志事件包装器
+ */
+class LogEventWrap {
+   public:
+    /**
+     * @brief 构造函数
+     * @param[in] e 日志事件
+     */
+    LogEventWrap(LogEvent::ptr e);
+
+    /**
+     * @brief 析构函数
+     */
+    ~LogEventWrap();
+
+    /**
+     * @brief 获取日志事件
+     */
+    LogEvent::ptr getEvent() const { return m_event; }
+
+    /**
+     * @brief 获取日志内容流
+     */
+    std::stringstream& getSS();
+
+   private:
+    /**
+     * @brief 获取日志内容流
+     */
+    LogEvent::ptr m_event;
 };
 
 /**
@@ -520,7 +570,49 @@ class TabFormatItem : public LogFormatter::FormatItem {
     std::string m_string;
 };
 
+/**
+ * @brief 日志器管理类
+ */
+class LoggerManager {
+   public:
+    // typedef Spinlock MutexType;
+    /**
+     * @brief 构造函数
+     */
+    LoggerManager();
+
+    /**
+     * @brief 获取日志器
+     * @param[in] name 日志器名称
+     */
+    Logger::ptr getLogger(const std::string& name);
+
+    /**
+     * @brief 初始化
+     */
+    void init();
+
+    /**
+     * @brief 返回主日志器
+     */
+    Logger::ptr getRoot() const { return m_root; }
+
+    /**
+     * @brief 将所有的日志器配置转成YAML String
+     */
+    // std::string toYamlString();
+   private:
+    /// Mutex
+    // MutexType m_mutex;
+    /// 日志器容器
+    std::map<std::string, Logger::ptr> m_loggers;
+    /// 主日志器
+    Logger::ptr m_root;
+};
+
+/// 日志器管理类单例模式
+typedef sylar::Singleton<LoggerManager> LoggerMgr;
 
 }  // namespace sylar
 
-// #endif
+#endif

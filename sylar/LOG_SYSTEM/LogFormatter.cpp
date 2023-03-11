@@ -1,123 +1,5 @@
-#include "log.h"
+#include "Log.h"
 namespace sylar {
-
-LogEvent::LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
-                   const char* file, int32_t line, uint32_t elapse,
-                   uint32_t thread_id, uint32_t fiber_id, uint64_t time,
-                   const std::string& threadname)
-    : m_logger(logger),
-      m_level(level),
-      m_file(file),
-      m_line(line),
-      m_elapse(elapse),
-      m_threadId(thread_id),
-      m_fiberId(fiber_id),
-      m_time(time),
-      m_threadName(threadname) {}
-
-const char* LogLevel::ToString(LogLevel::Level level) {
-    switch (level) {
-#define XX(name)         \
-    case LogLevel::name: \
-        return #name;    \
-        break;
-
-        XX(DEBUG);
-        XX(INFO);
-        XX(WARN);
-        XX(ERROR);
-        XX(FATAL);
-#undef XX
-        default:
-            return "UNKNOW";
-            break;
-    }
-    return "UNKNOW";
-}
-
-LogLevel::Level LogLevel::FromString(const std::string& str) {
-#define XX(level, v)            \
-    if (str == #v) {            \
-        return LogLevel::level; \
-    }
-
-    XX(DEBUG, DEBUG);
-    XX(INFO, INFO);
-    XX(WARN, WARN);
-    XX(ERROR, ERROR);
-    XX(FATAL, FATAL);
-
-    XX(DEBUG, debug);
-    XX(INFO, info);
-    XX(WARN, warn);
-    XX(ERROR, error);
-    XX(FATAL, fatal);
-    return LogLevel::UNKNOW;
-#undef XX
-}
-
-Logger::Logger(const std::string& name /* = "root" */)
-    : m_name(name), m_level(LogLevel::DEBUG) {
-    m_formatter.reset(new LogFormatter("%d  [%p]  %f  %l  %m  %n"));
-}
-
-void Logger::log(LogLevel::Level level, LogEvent::ptr event) {
-    if (level >= m_level) {
-        auto self = shared_from_this();
-        if (!m_appenders.empty()) {
-            for (auto& it : m_appenders) {
-                // TODO:使用auto标明一个变量，这个变量永远不会是引用变量。
-                it->log(self, level, event);
-            }
-        }
-    }
-}
-void Logger::debug(LogEvent::ptr event) { log(LogLevel::DEBUG, event); }
-void Logger::info(LogEvent::ptr event) { log(LogLevel::INFO, event); }
-void Logger::warn(LogEvent::ptr event) { log(LogLevel::WARN, event); }
-void Logger::error(LogEvent::ptr event) { log(LogLevel::ERROR, event); }
-void Logger::fatal(LogEvent::ptr event) { log(LogLevel::FATAL, event); }
-void Logger::addAppender(LogAppender::ptr appender) {
-    if(!appender->getFormatter()) {
-        appender->setFormatter(m_formatter);
-    }
-    
-    m_appenders.push_back(appender);
-}
-void Logger::delAppender(LogAppender::ptr appender) {
-    for (auto it = m_appenders.begin(); it != m_appenders.end(); ++it) {
-        if (*it == appender) {
-            m_appenders.erase(it);
-            break;
-        }
-    }
-}
-
-FileLogAppender::FileLogAppender(const std::string& filename)
-    : m_filename(filename) {}
-
-void FileLogAppender::log(std::shared_ptr<Logger> logger, LogLevel::Level level,
-                          LogEvent::ptr event) {
-    if (level >= m_level) {
-        m_filestream << m_formatter->format(logger, level, event);
-    }
-}
-
-bool FileLogAppender::reopen() {
-    if (m_filestream) {
-        m_filestream.close();
-    }
-    m_filestream.open(m_filename);
-    return !!m_filestream;
-}
-
-void StdoutLogAppender::log(std::shared_ptr<Logger> logger,
-                            LogLevel::Level level, LogEvent::ptr event) {
-    if (level >= m_level) {
-        std::cout << m_formatter->format(logger, level, event);
-    }
-}
-
 LogFormatter::LogFormatter(const std::string& pattern) : m_pattern(pattern) {
     init();
 }
@@ -232,15 +114,15 @@ void LogFormatter::init() {
             XX(m, MessageFormatItem),  // m:消息
             XX(p, LevelFormatItem),    // p:日志级别
             // XX(r, ElapseFormatItem),    // r:累计毫秒数
-            // XX(c, NameFormatItem),      // c:日志名称
-            // XX(t, ThreadIdFormatItem),  // t:线程id
+            XX(c, NameFormatItem),      // c:日志名称
+            XX(t, ThreadIdFormatItem),  // t:线程id
             XX(n, NewLineFormatItem),   // n:换行
             XX(d, DateTimeFormatItem),  // d:时间
             XX(f, FilenameFormatItem),  // f:文件名
             XX(l, LineFormatItem),      // l:行号
-    // XX(T, TabFormatItem),               //T:Tab
-    // XX(F, FiberIdFormatItem),           //F:协程id
-    // XX(N, ThreadNameFormatItem),        //N:线程名称
+            XX(T, TabFormatItem),               //T:Tab
+            XX(F, FiberIdFormatItem),           //F:协程id
+            XX(N, ThreadNameFormatItem),        //N:线程名称
 #undef XX
         };
 
@@ -263,4 +145,4 @@ void LogFormatter::init() {
     }
     // std::cout << m_items.size() << std::endl;
 }
-}  // namespace sylar
+}
