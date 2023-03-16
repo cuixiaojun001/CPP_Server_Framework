@@ -30,9 +30,9 @@ set(LIBS
 
 # 指定生成目标
 # sylar_add_executable(test_config "tests/test_config.cpp" sylar "${LIBS}")
-# add_executable(test tests/test.cpp)
-# add_dependencies(test sylar)
-# target_link_libraries(test sylar)
+add_executable(test tests/test.cpp)
+add_dependencies(test sylar)
+target_link_libraries(test sylar)
 
 add_executable(test_config tests/test_config.cpp)
 add_dependencies(test_config sylar)

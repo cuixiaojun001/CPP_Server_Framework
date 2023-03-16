@@ -13,7 +13,7 @@ int main(int argc, char** agrv) {
     // logger->log(sylar::LogLevel::DEBUG, event);
     // std::cout << "hello sylar log" << std::endl;
 
-    SYLAR_LOG_DEBUG(logger) << "test macro";
+    SYLAR_LOG_DEBUG(logger); 
 
     auto l = sylar::LoggerMgr::GetInstance()->getLogger("xx");
     SYLAR_LOG_INFO(l) << "xxx";

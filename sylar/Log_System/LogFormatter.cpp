@@ -23,11 +23,11 @@ std::string LogFormatter::format(std::shared_ptr<Logger> logger,
 //     return ofs;
 // }
 
-// %xxx %xxx{xxx} %%
-void LogFormatter::init() {
-    // str, format, type
-    std::vector<std::tuple<std::string, std::string, int>> vec;
-    std::string nstr;
+// %xxx %xxx{xxx} %%      控制字符有'['、']'、':'
+void LogFormatter::init() { // 将m_pattern中%后面的替换格式提取出来,将控制格式提取出来
+    // str, format, type[0:表示控制格式, 直接输出; 1:表示替换格式, 替换后输出]
+    std::vector<std::tuple<std::string, std::string, int>> vec; // 存{str, format, type}三元组
+    std::string nstr; // 存alpha
     for (size_t i = 0; i < m_pattern.size(); ++i) {
         if (m_pattern[i] != '%') {
             nstr.append(1, m_pattern[i]);
@@ -40,7 +40,7 @@ void LogFormatter::init() {
             continue;
         }
         // m_pattern[i] == '%' && m_pattern[i+1] != '%'
-        int fmt_status = 0;  // 0: 解析str 1:解析格式
+        int fmt_status = 0;  // 0:解析str ; 1:解析格式
         size_t fmt_begin = 0;
         std::string str;
         std::string fmt;
@@ -48,12 +48,12 @@ void LogFormatter::init() {
             if (!fmt_status && (!isalpha(m_pattern[n]) && m_pattern[n] != '{' &&
                                 m_pattern[n] != '}')) {
                 // fmt_status == 0 && m_pattern[n]不是字母也不是{}
-                // 遇到空格或%, 将i后面的字符串到m_pattern[n]之前的这一段形成str
+                // 遇到空格或%或:, 将i后面的字符串到m_pattern[n]之前的这一段形成str
                 str = m_pattern.substr(i + 1, n - i - 1);
                 // std::cout << "str:*" << str << std::endl;
                 break;
             }
-            if (fmt_status == 0) {
+            if (fmt_status == 0) { // fmt_status == 0 && m_pattern[n] 是字母或者 {}
                 if (m_pattern[n] == '{') {
                     str = m_pattern.substr(
                         i + 1, n - i - 1);  // substr返回子串[pos, pos+count]
@@ -63,7 +63,7 @@ void LogFormatter::init() {
                     ++n;
                     continue;
                 }
-            } else if (fmt_status == 1) {
+            } else if (fmt_status == 1) { // fmt_status == 1
                 if (m_pattern[n] == '}') {
                     fmt = m_pattern.substr(fmt_begin + 1, n - fmt_begin - 1);
                     // std::cout << "fmt:#" << fmt << std::endl;
@@ -102,6 +102,7 @@ void LogFormatter::init() {
     if (!nstr.empty()) {
         vec.push_back(std::make_tuple(nstr, "", 0));
     }
+    // 将替换字符与对应的函数指针绑定起来
     static std::map<std::string,
                     std::function<FormatItem::ptr(const std::string& str)>>
         s_format_items = {
@@ -127,11 +128,11 @@ void LogFormatter::init() {
         };
 
     for (auto& i : vec) {
-        if (std::get<2>(i) == 0) {  // 非字母
+        if (std::get<2>(i) == 0) {  // 元组第一项是控制格式字符
             m_items.push_back(
                 FormatItem::ptr(new StringFormatItem(std::get<0>(i))));
-        } else {
-            auto it = s_format_items.find(std::get<0>(i));
+        } else { // 元组第一项是替换格式字符
+            auto it = s_format_items.find(std::get<0>(i)); // map迭代器
             if (it == s_format_items.end()) {
                 m_items.push_back(FormatItem::ptr(new StringFormatItem(
                     "<<error_format %" + std::get<0>(i) + ">>")));

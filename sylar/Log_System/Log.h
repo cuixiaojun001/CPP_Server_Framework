@@ -90,10 +90,7 @@ class LogEvent {
      * @param[in] time 日志时间(秒)
      * @param[in] thread_name 线程名称
      */
-    LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
-             const char* file, int32_t line, uint32_t elapse,
-             uint32_t thread_id, uint32_t fiber_id, uint64_t time,
-             const std::string& threadname);
+    LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t line, uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time, const std::string& threadname);
 
     /// @brief 返回文件名
     const char* getFile() const { return m_file; }
@@ -259,7 +256,6 @@ class LogFormatter {
  * @brief 日志输出目标
  */
 class LogAppender {
-    // friend class Logger;
    public:
     typedef std::shared_ptr<LogAppender> ptr;
     /**
