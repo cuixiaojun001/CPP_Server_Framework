@@ -13,3 +13,24 @@ logs:
           - type: FileLogAppender
             path: log.txt
           - type: StdoutLogAppender
+system:
+    port: 9900
+    value: 15
+    vec_value:
+      - 20
+      - 30
+      - 40
+class:
+    person:
+        name: cxj
+        age: 21
+        sex: true
+    map:
+        cxj01: 
+            name: cxj
+            age: 21
+            sex: true
+        cxj02:
+            name: cxj2
+            age: 21
+            sex: false

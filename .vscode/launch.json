@@ -1,11 +1,12 @@
 {
     "version": "0.2.0",
     "configurations": [
+
       {
         "name": "(gdb) Launch",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/bin/test",
+        "program": "${workspaceFolder}/bin/test_config",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",

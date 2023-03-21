@@ -57,6 +57,7 @@
         "set": "cpp",
         "cfenv": "cpp",
         "cinttypes": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "unordered_set": "cpp"
     }
 }

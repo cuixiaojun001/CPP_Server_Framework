@@ -13,15 +13,18 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <string.h>
 
 #include "singleton.h"
 #include "util.h"
+
+#define filename(x) strrchr(x,'/')?strrchr(x,'/')+1:x
 
 #define SYLAR_LOG_LEVEL(logger, level)                                  \
     if (logger->getLevel() <= level)                                    \
     sylar::LogEventWrap(                                                \
         sylar::LogEvent::ptr(new sylar::LogEvent(                       \
-            logger, level, __FILE__, __LINE__, 0, sylar::GetThreadId(), \
+            logger, level, filename(__FILE__), __LINE__, 0, sylar::GetThreadId(), \
             sylar::GetFiberId(), time(0), "123")))                      \
         .getSS()
 
