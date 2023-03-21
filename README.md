@@ -48,6 +48,54 @@ Log像一台全天24小时开启的摄像头，记录服务器上各种重要事
 
 # 开发过程中使用到的技术
 
+## C++ Template
+**泛型程序设计**：所谓“泛型”，指的是算法只要实现一遍，就能适用于多种数据类型。能减少重复代码的反复编写。
+### 函数模板
+所谓函数模板，旨在建立一个通用函数，他所用到的数据类型(包括返回值类型，参数类型，局部变量类型)可以用一个临时的标识符来替代，在发生函数调用时逆向推导出真正的数据类型。
+```cpp
+template<typename T1, typename T2, ···> 返回值类型 函数名(形参列表) {
+    //在函数体中可以使用类型参数
+}
+```
+`template`是定义函数模板的关键字，它后面紧跟尖括号`<>`
+`typename`是声明具体类型参数的关键字, 可以使用`class`关键字代替, 没有任何区别。
+### 类模板
+类模板的目的同样是把数据的类型参数化
+类外定义成员函数同样需要带上模板头(除了template后面要跟类型参数, 类名后也要加类型参数, 只是不加typename关键字)
+#### 使用类模板创建对象
+创建对象时需要具体指明数据类型
+## C++ STL
+### STL迭代器iterator
+1. 前向迭代器
+2. 双向迭代器
+3. 随机访问迭代器
+#### 迭代器的四种定义方式
+|迭代器定义方式|具体格式|
+| ------------ | -------|
+|正向迭代器|容器类名::iterator 迭代器名|
+|正向常量迭代器| 容器类名::const_iterator 迭代器名|
+|反向迭代器|容器类名::reverse_iterator 迭代器名|
+|常量反向迭代器|容器类名::reverse_iterator 迭代器名|
+
+`*迭代器名`表示迭代器指向的元素
+
+### STL序列性容器
+`array, list, vector, deque, forward_list`
+不会对存储的元素排序，按照存储的顺序排列
+#### array
+- 迭代器: 随机访问迭代器
+#### vector
+- 迭代器: 随机访问迭代器
+##### emplace_back()和push_back()的区别
+功能逻辑相同，区别在于底层实现机制不同：
+push_back() 向容器尾部添加元素前，首先创建这个元素，再将这个元素拷贝或移动到容器中(优先选择移动构造, 如果是拷贝构造的话，事后会自行销毁先前创建的对象); 而emplace_back()在实现的时候直接在容器尾部添加新元素。
+##### insert() 和 emplace() 的区别
+emplace() 在插入元素时，是在容器的指定位置直接构造元素，而不是先单独生成，再将其复制（或移动）到容器中。
+#### deque
+- 迭代器: 随机访问迭代器
+#### list
+- 迭代器: 
+
 ## C++ 11
 
 ### shared\_ptr 智能指针
@@ -106,6 +154,46 @@ shared\_ptr 和 unique\_ptr, weak\_ptr 不同点在于：
 ## std::function 和 std::bind
 
 `std::function`是通用多态函数封装器。`std::function`的实例能存储、复制及调用任何可调用目标——— 函数，`lambda`表达式，`bind`表达式或者其他函数对象，还有指向成员函数指针和指向数据成员指针。
+**用途:**   可以实现函数回调，即在运行时指定要调用的函数，而不是在编译时固定下来。
+
+## std::transform
+
+在指定的范围内应用于给定的操作，并将结果存储在指定的另一个范围内。
+
+## Lambda表达式
+通常用于传递函数对象作为参数，以及定义函数对象
+```cpp
+[capture list] (parameters) -> return_type { function body }
+```
+- capture list：捕获列表，用于捕获一些外部变量，可以是值传递或引用传递。捕获列表可以为空。
+- parameters：参数列表，类似于函数参数列表，可以为空。
+- return_type：返回类型，可以省略，编译器会自动推断。
+- function body：函数体，类似于普通函数的函数体。
+
+## &#x20;npos --> size\_t的最大值
+
+```cpp
+std::string::npos
+```
+
+## Boost库函数
+
+## Yaml-CPP API:
+1. `YAML::Load`: 从字符串或文件中读取YAML文档并解析它。返回一个YAML::Node对象。
+2. `YAML::Node`: 一个YAML文档的节点。可以使用下标运算符或成员函数来访问节点。节点可以是标量、序列或映射。
+3. `YAML::Node::Type()`: 返回节点的类型（标量、序列或映射）。
+4. `YAML::Node::IsNull()`: 返回节点是否为NULL。
+5. `YAML::Node::as<>`: 返回节点的值。可以使用不同类型的模板参数来获取节点的不同类型值，如as<int>()、as<double>()、as<std::string>()等。
+6. `YAML::Node::size()`: 返回序列节点的元素个数。
+7. `YAML::Node::begin()`和`YAML::Node::end()`: 返回序列节点的起始和结束迭代器。
+8. `YAML::Node::push_back()`: 将一个值添加到序列节点的末尾。
+9. `YAML::Node::remove()`: 从序列节点中删除指定的元素。
+10. `YAML::Node::insert()`: 在映射节点中插入一个键值对。
+11. `YAML::Node::remove()`: 从映射节点中删除指定的键值对。
+12. `YAML::Node::begin()`和`YAML::Node::end()`: 返回映射节点的起始和结束迭代器。
+13. `YAML::Emitter`: 用于将YAML数据生成为字符串或文件。提供了一组操作符，用于生成不同类型的节点。可以使用流操作符将节点写入流。
+14. `YAML::Parser`: 在一个输入流中解析YAML文档。提供了一组回调函数，以处理不同类型的节点。每当解析器遇到一个新节点时，都会调用相应的回调函数。
+
 
 ## C++ 常见软件注释规范Doxygen
 
@@ -183,110 +271,64 @@ std::enable\_shared\_from\_this 是一个模板类，子类继承enable\_shared\
 3.  init() 解析\*\*"%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T\[%p]%T\[%c]%T%f:%l%T%m%n"\*\*
 4.  为logger创建标准输出appender
 5.  执行StdoutAppender的构造函数
-6.  局部变量LogEventWrap构造函数动态创建一个LogEvent对象, 超出生命周期时调用LogEventWrap的析构函数: 成员属性m_event的m_logger调用log函数, 传入event级别和event
-7.  m_logger遍历他的appender,调用每一个appender的log(), 把自己, 日志级别, 日志事件传入
-8.  m_appender调用m_formatter的format()
-9.  m_formatter遍历每一个m_item,调用对应的format
-
-
+6.  局部变量LogEventWrap构造函数动态创建一个LogEvent对象, 超出生命周期时调用LogEventWrap的析构函数: 成员属性m\_event的m\_logger调用log函数, 传入event级别和event
+7.  m\_logger遍历他的appender,调用每一个appender的log(), 把自己, 日志级别, 日志事件传入
+8.  m\_appender调用m\_formatter的format()
+9.  m\_formatter遍历每一个m\_item,调用对应的format
 
     logger调用StdoutAppender的log
     它std::cout 输出 继承自LogAppender的类LogFormatter成员变量m\_formatter的format()函数的值,返回值是string
+    
+[日志模块类图](https://mermaid.live/view#pako:eNqVVMFq20AQ_RWxEEhbW9iyY8nCBNomhkDcSwwNRRA20lhZkLRitQ5NHd9a2l5Kv6DXQg-lkKMP_RrX_YyutLK8suzG3oM0mnnz3uzOaCfIpR4gG7kBTpITgn2GQyfSxPIIA5cTGmnDF9JzcKAtZu_nXz_NPzwsHmaHL2kY04SkmCcScU59H9gAR1i8NAc1HaQ9rdeFFQlLRjU7ZylS-pSFmHMRSrHy64xDWEX6OWYb0-ktRPw1w3FJuym1s-Bmzg2VPo9jiLxNIusJOf1qF5WMgmuPNPUpDv7ysiBZzL7_-fz778cfKnVVq3cvZC64R8f8cVyfBFBBZbJKO-Y_vy2-_FIaJGEKonev69oAkkT0X-2jzNwMP4dbCFbO_2JPAxwnsCN4eMMAe2fejvA-uQa2M1qSv8LhrtXsAT3BHIYk3HqCj_-HJBIDNcIuVJqV_efLKZ5IX7rq5VkMr0ZLew3jZ1FGKV8LFAMVXuHcTFaQZ1pA_UNd1_MKp2vlFNlKTb0evk44wy4_PlbFlHNZ1pl-7KG22uhETZJc2_IU2VKRxWGrVZbItBIbqqEQRIx44t7NmBzEbyAEB9nC9GCExwF3kBNNBRSPOb24i1xkczaGGhrHnhiP_KZeOsEjnLJBfpWnrxqKcYTsCXqL7Hrb0M2G0TVMq3PUbnTbZg3dIdto6i3DEo5my-gYZstsT2voHaWCtaFbVqfdsbpH3U6r2eiarYzvTRYc4SCB6T8LSBwZ)
 
 # 类图
+[![日志系统类图](https://mermaid.ink/img/pako:eNqVVMFq20AQ_RWxEEhbW9iyY8nCBNomhkDcSwwNRRA20lhZkLRitQ5NHd9a2l5Kv6DXQg-lkKMP_RrX_YyutLK8suzG3oM0mnnz3uzOaCfIpR4gG7kBTpITgn2GQyfSxPIIA5cTGmnDF9JzcKAtZu_nXz_NPzwsHmaHL2kY04SkmCcScU59H9gAR1i8NAc1HaQ9rdeFFQlLRjU7ZylS-pSFmHMRSrHy64xDWEX6OWYb0-ktRPw1w3FJuym1s-Bmzg2VPo9jiLxNIusJOf1qF5WMgmuPNPUpDv7ysiBZzL7_-fz778cfKnVVq3cvZC64R8f8cVyfBFBBZbJKO-Y_vy2-_FIaJGEKonev69oAkkT0X-2jzNwMP4dbCFbO_2JPAxwnsCN4eMMAe2fejvA-uQa2M1qSv8LhrtXsAT3BHIYk3HqCj_-HJBIDNcIuVJqV_efLKZ5IX7rq5VkMr0ZLew3jZ1FGKV8LFAMVXuHcTFaQZ1pA_UNd1_MKp2vlFNlKTb0evk44wy4_PlbFlHNZ1pl-7KG22uhETZJc2_IU2VKRxWGrVZbItBIbqqEQRIx44t7NmBzEbyAEB9nC9GCExwF3kBNNBRSPOb24i1xkczaGGhrHnhiP_KZG9ggHifCCRzhlg_wuT181FOMI2RP0Ftn1tqGbDaNrmFbnqN3ots0aukO20dRbhiUczZbRMcyW2Z7W0DtKBW1Dt6xOu2N1j7qdVrPRNVsZ35ssmGlO_wEqdRxk?type=png)](https://mermaid.live/edit#pako:eNqVVMFq20AQ_RWxEEhbW9iyY8nCBNomhkDcSwwNRRA20lhZkLRitQ5NHd9a2l5Kv6DXQg-lkKMP_RrX_YyutLK8suzG3oM0mnnz3uzOaCfIpR4gG7kBTpITgn2GQyfSxPIIA5cTGmnDF9JzcKAtZu_nXz_NPzwsHmaHL2kY04SkmCcScU59H9gAR1i8NAc1HaQ9rdeFFQlLRjU7ZylS-pSFmHMRSrHy64xDWEX6OWYb0-ktRPw1w3FJuym1s-Bmzg2VPo9jiLxNIusJOf1qF5WMgmuPNPUpDv7ysiBZzL7_-fz778cfKnVVq3cvZC64R8f8cVyfBFBBZbJKO-Y_vy2-_FIaJGEKonev69oAkkT0X-2jzNwMP4dbCFbO_2JPAxwnsCN4eMMAe2fejvA-uQa2M1qSv8LhrtXsAT3BHIYk3HqCj_-HJBIDNcIuVJqV_efLKZ5IX7rq5VkMr0ZLew3jZ1FGKV8LFAMVXuHcTFaQZ1pA_UNd1_MKp2vlFNlKTb0evk44wy4_PlbFlHNZ1pl-7KG22uhETZJc2_IU2VKRxWGrVZbItBIbqqEQRIx44t7NmBzEbyAEB9nC9GCExwF3kBNNBRSPOb24i1xkczaGGhrHnhiP_KZG9ggHifCCRzhlg_wuT181FOMI2RP0Ftn1tqGbDaNrmFbnqN3ots0aukO20dRbhiUczZbRMcyW2Z7W0DtKBW1Dt6xOu2N1j7qdVrPRNVsZ35ssmGlO_wEqdRxk)
 
 ```mermaid
 classDiagram
-enable_shared_from_this <|--Logger : 模板类
-Level *-- LogLevel
-LogEventWrap "1" -- "1" LogEvent
-LogFormatter "1" -- "1" LogAppender
-LogAppender "1" -- "n" Logger
-LogAppender <|-- StdoutLogAppender
-LogAppender <|-- FileLogAppender
-<<Enum>> Level
-class Level {
-    UNKNOW
-    DEBUG
-    INFO
-    ERROR
-    FATAL
-}
-class LogLevel {
-    +static const char* ToString(LogLevel::Level level)
-    +static LogLevel::Level FromString(const std::string& str)
-}
-class LogAppender {
-    #LogLevel::Level m_level = LogLevel::DEBUG
-    #LogFormatter::ptr m_formatter
-    #bool m_hasFormatter = false
-    +virtual ~LogAppender()
-    +virtual void log(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event) = 0
-    +void setFormatter(LogFormatter::ptr val)
-    +LogFormatter::ptr getFormatter()
-    +LogLevel::Level getLevel()
-    +void setLevel(LogLevel::Level val)
-}
-class LogFormatter {
-    -std::string m_pattern
-    -std::vector<FormatItem::ptr> m_items
-    -bool m_error = false
-    +LogFormatter(const std::string& pattern)
-    +std::string format(std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
-    +std::ostream& format(std::ostream& ofs, std::shared_ptr<Logger> logger, LogLevel::Level level, LogEvent::ptr event);
-    +void init()
-    +bool isError()
-    +const std::string getPattern()
-}
-class Logger {
-    -std::string m_name
-    -LogLevel::Level m_level
-    -list~LogAppender::ptr~ m_appenders
-    -LogFormatter::ptr m_formatter
-    +Logger(const std::string& name = "root")
-    +log(LogLevel::Level level, LogEvent::ptr event) void
-    +debug(LogEvent::ptr event) void
-    +info(LogEvent::ptr event) void
-    +warn(LogEvent::ptr event) void
-    +error(LogEvent::ptr event) void
-    +fatal(LogEvent::ptr event) void
-    +addAppender(LogAppender::ptr appender) void
-    +delAppender(LogAppender::ptr appender) void
-    +clearAppenders() void
-    +LogLevel::Level getLevel()
-    +setLevel(LogLevel::Level val) void
-    +const std::string& getName()
-}
-class LogEventWrap {
-    +LogEventWrap(LogEvent::ptr e)
-    +~LogEventWrap()
-    +LogEvent::ptr getEvent()
-    +std::stringstream& getSS()
-    -LogEvent::ptr m_event
-}
-class LogEvent {
-    -std::stringstream m_ss
-    -std::shared_ptr<Logger> m_logger
-    -LogLevel::Level m_level
-    -const char* m_file = nullptr
-    -int32_t m_line
-    -uint32_t m_elapse
-    -uint32_t m_threadId
-    -uint32_t m_fiberId
-    -uint64_t m_time
-    -std::string m_threadName
-    +const char* getFile()
-    +int32_t getLine()
-    +uint32_t getElapse()
-    +uint32_t getThreadId()
-    +uint32_t getFiberId()
-    +uint64_t getTime()
-    +std::string getContent()
-    +std::shared_ptr<Logger> getLogger()
-    +LogLevel::Level getLevel()
-    +std::stringstream& getSS()
-    +const std::string& getThreadName()
-}
+    direction TB
+    %% 组合关系(Composition)
+    LoggerManager "1" *-- "n" Logger : 组合
+    LogFormatter *-- FormatItem : 组合
+    Logger *-- Logger : 组合
+    LogEventWrap "1" *-- "1" LogEvent : 组合
+    Logger "1" *-- "n" LogAppender : 组合
+    Logger "1" *-- "1" LogFormatter : 组合
+    LogAppender "1" *-- "1" LogFormatter : 组合
+    
+    
+    %% XXAppender 继承自 LogAppender
+    LogAppender <|-- StdoutLogAppender
+    LogAppender <|-- FileLogAppender
+    %% XXFormatItem 实现 FormatItem
+    FormatItem <|.. MessageFormatItem :实现
+    FormatItem <|.. LevelFormatItem:实现
+    FormatItem <|.. ElapseFormatItem:实现
+    FormatItem <|.. ThreadIdFormatItem:实现
+    FormatItem <|.. FiberIdFormatItem:实现
+    FormatItem <|.. ThreadNameFormatItem:实现
+    FormatItem <|.. NameFormatItem:实现
+    FormatItem <|.. DateTimeFormatItem :实现
+    %% 组合关系(Composition)
+    interface FormatItem
+    class Logger {
+        - LogFormatter m_formatter
+        - Logger m_root
+        - LogAppender m_appenders
+        + log(...)
+    }
+    class LogAppender {
+        <<abstract>>
+        - FormatItem m_formatItems
+        + log(...)
+    }
+    class LogFormatter {
+        + format(...)
+    }
+    class FormatItem {
+        <<interface>>
+        + format(...) 
+    }
 ```
 
 # c复习
@@ -337,4 +379,6 @@ class LogEvent {
 | %n                          | 将已输出的字符数量存储在一个变量中                                                                          |
 |                             |                                                                                            |
 
+**结构体内存对齐**
 
+因为在内存中，结构体的大小必须是其最长成员的大小的整数倍。这是为了确保结构体的成员始终按照其声明的顺序正确对齐，并且可以正确地访问它们的地址。

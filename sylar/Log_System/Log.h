@@ -3,6 +3,7 @@
 #define __SYLAR_LOG_H__
 
 #include <stdint.h>
+#include <string.h>
 
 #include <fstream>
 #include <functional>
@@ -13,19 +14,18 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <string.h>
 
 #include "singleton.h"
 #include "util.h"
 
-#define filename(x) strrchr(x,'/')?strrchr(x,'/')+1:x
+#define filename(x) strrchr(x, '/') ? strrchr(x, '/') + 1 : x
 
-#define SYLAR_LOG_LEVEL(logger, level)                                  \
-    if (logger->getLevel() <= level)                                    \
-    sylar::LogEventWrap(                                                \
-        sylar::LogEvent::ptr(new sylar::LogEvent(                       \
-            logger, level, filename(__FILE__), __LINE__, 0, sylar::GetThreadId(), \
-            sylar::GetFiberId(), time(0), "123")))                      \
+#define SYLAR_LOG_LEVEL(logger, level)                                   \
+    if (logger->getLevel() <= level)                                     \
+    sylar::LogEventWrap(                                                 \
+        sylar::LogEvent::ptr(new sylar::LogEvent(                        \
+            logger, level, filename(__FILE__), __LINE__, 0,              \
+            sylar::GetThreadId(), sylar::GetFiberId(), time(0), "123"))) \
         .getSS()
 
 #define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger, sylar::LogLevel::DEBUG)
@@ -93,7 +93,10 @@ class LogEvent {
      * @param[in] time 日志时间(秒)
      * @param[in] thread_name 线程名称
      */
-    LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level, const char* file, int32_t line, uint32_t elapse, uint32_t thread_id, uint32_t fiber_id, uint64_t time, const std::string& threadname);
+    LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
+             const char* file, int32_t line, uint32_t elapse,
+             uint32_t thread_id, uint32_t fiber_id, uint64_t time,
+             const std::string& threadname);
 
     /// @brief 返回文件名
     const char* getFile() const { return m_file; }

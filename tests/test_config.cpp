@@ -98,6 +98,10 @@ public:
         ss << "[Person name = " << m_name << " age = " << m_age << " sex = " << m_sex << "]";
         return ss.str();
     }
+
+    bool operator==(const Person& other) const{
+        return this->m_name == other.m_name && this->m_age == other.m_age && this->m_sex == other.m_sex;
+    }
 };
 
 namespace sylar {
@@ -145,11 +149,15 @@ void test_class() {
         SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << #prefix  << ": size=" << m.size(); \
     }
 
+    g_person->addListener(10, [](const Person& old_value, const Person& new_value){
+        SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "old_value=" << old_value.toString() << " new_value=" << new_value.toString();
+    });
+
     XX_PM(g_person_map, "class.map before");
     YAML::Node root = YAML::LoadFile("/home/cxj/workspace/sylar/bin/conf/log.yml");
     sylar::Config::LoadFromYaml(root);
-    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "before: " << g_person->getValue().toString() << " : " << g_person->toString();
-    XX_PM(g_person_map, "class.map before");
+    SYLAR_LOG_INFO(SYLAR_LOG_ROOT()) << "after: " << g_person->getValue().toString() << " : " << g_person->toString();
+    XX_PM(g_person_map, "class.map after");
     #undef XX_PM
 }
 
