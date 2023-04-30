@@ -1,19 +1,20 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-28 23:02:08
- * @LastEditTime: 2023-04-29 17:52:36
+ * @LastEditTime: 2023-04-29 21:09:20
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
 #ifndef __THREAD_H__
 #define __THREAD_H__
 
-#include <memory>
 #include <functional>
 #include <string>
 #include <pthread.h>
+#include "mutex.h"
 
 namespace sylar {
+    
     class Thread {
         public:
             typedef std::shared_ptr<Thread> ptr;
@@ -52,6 +53,7 @@ namespace sylar {
             pthread_t m_thread;
             std::function<void()> m_cb;
             std::string m_name;
+            Semaphore m_semaphore;
     };
 }
 

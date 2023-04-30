@@ -217,7 +217,7 @@ LogEvent::LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level
 Logger::Logger(const std::string& name)
     :m_name(name)
     ,m_level(LogLevel::DEBUG) {
-    m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S}%T%t%T%F%T[%p]%T[%c]%T%f:%l%T%m%n"));
+    m_formatter.reset(new LogFormatter("%d{%Y-%m-%d %H:%M:%S} tid[%t] %F [%p] [%c] %f:%l %m%n"));
 }
 
 void Logger::setFormatter(LogFormatter::ptr val) {
