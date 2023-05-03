@@ -11,7 +11,7 @@ include_directories(/apps/sylar/include)
 link_directories(/apps/sylar/lib)
 
 find_library(YAMLCPP yaml-cpp)
-message("***", ${YAMLCPP})
+# message("***", ${YAMLCPP})
 
 set(LIB_SRC
     sylar/log.cc
@@ -19,6 +19,7 @@ set(LIB_SRC
     sylar/config.cc
     sylar/thread.cpp
     sylar/mutex.cpp
+    sylar/fiber.cpp
     )
 
 add_library(sylar SHARED ${LIB_SRC})
@@ -46,6 +47,21 @@ add_executable(test_thread tests/test_thread.cpp)
 add_dependencies(test_thread sylar)
 force_redefine_file_macro_for_sources(test_thread) #__FILE__
 target_link_libraries(test_thread sylar ${LIB_LIB})
+
+add_executable(test_atomic tests/test_atomic.cpp)
+add_dependencies(test_atomic sylar)
+force_redefine_file_macro_for_sources(test_atomic) #__FILE__
+target_link_libraries(test_atomic sylar ${LIB_LIB})
+
+add_executable(test_util tests/test_util.cpp)
+add_dependencies(test_util sylar)
+force_redefine_file_macro_for_sources(test_util) #__FILE__
+target_link_libraries(test_util sylar ${LIB_LIB})
+
+add_executable(test_fiber tests/test_fiber.cpp)
+add_dependencies(test_fiber sylar)
+force_redefine_file_macro_for_sources(test_fiber) #__FILE__
+target_link_libraries(test_fiber sylar ${LIB_LIB})
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

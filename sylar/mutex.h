@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-29 20:18:47
- * @LastEditTime: 2023-04-29 23:30:54
+ * @LastEditTime: 2023-04-30 22:59:45
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -9,7 +9,7 @@
 #define __MUTEX_H__
 #include <semaphore.h>
 #include <stdint.h>
-
+#include <atomic>
 #include <memory>
 
 namespace sylar {
@@ -72,6 +72,53 @@ private:
     T& m_mutex;
     /// @brief 查看是否上锁
     bool m_locked;
+};
+
+class Mutex {
+public:
+    typedef ScopedLockImpl<Mutex> Lock;
+    Mutex() {
+        pthread_mutex_init(&m_mutex, nullptr);
+    }
+    ~Mutex() {
+        pthread_mutex_destroy(&m_mutex);
+    }
+    void lock() {
+        pthread_mutex_lock(&m_mutex);
+    }
+    void unlock() {
+        pthread_mutex_unlock(&m_mutex);
+    }
+private:
+    pthread_mutex_t m_mutex;
+};
+
+class NullMutex {
+public:
+    typedef ScopedLockImpl<NullMutex> Lock;
+    NullMutex() {}
+    ~NullMutex() {}
+    void lock() {}
+    void unlock() {}
+};
+
+class Spinlock {
+public:
+    typedef ScopedLockImpl<Spinlock> Lock;
+    Spinlock() {
+        pthread_spin_init(&m_mutex, 0); // 非进程间共享
+    }
+    ~Spinlock() {
+        pthread_spin_destroy(&m_mutex);
+    }
+    void lock() {
+        pthread_spin_lock(&m_mutex);
+    }
+    void unlock() {
+        pthread_spin_unlock(&m_mutex);
+    }
+private:
+    pthread_spinlock_t m_mutex;
 };
 
 /**
@@ -175,6 +222,28 @@ public:
     }
 private:
     pthread_rwlock_t m_lock;
+};
+
+class CASLock {
+public:
+    typedef ScopedLockImpl<CASLock> Lock;
+    CASLock() {
+        m_mutex.clear();
+    }
+    ~CASLock() {
+
+    }
+    void lock() {
+        while(m_mutex.test_and_set(std::memory_order_acquire)) { // 如果A跟V不一致, 返回true
+            // 自旋等待自旋锁被释放
+        }
+    }   
+    void unlock() {
+        m_mutex.clear(std::memory_order_release); // 释放自旋锁
+    }
+private:
+    /// @brief 原子状态, 直接从内存读取
+    volatile std::atomic_flag m_mutex;
 };
 }  // namespace sylar
 #endif  //__MUTEX_H__
