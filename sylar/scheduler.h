@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-05-03 20:22:44
- * @LastEditTime: 2023-05-03 21:52:31
+ * @LastEditTime: 2023-05-04 11:11:46
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -26,8 +26,7 @@ public:
 	 * @param[in] use_caller 是否使用当前调用线程
 	 * @param[in] name 协程调度器名称
 	 */
-	Scheduler(size_t threads = 1, bool use_caller = true,
-	          const std::string& name = "");
+	Scheduler(size_t threads = 1, bool use_caller = true, const std::string& name = "");
 	virtual ~Scheduler();
 
 public:
@@ -67,7 +66,21 @@ public:
 
 protected:
 	virtual void tickle();
-
+    /**
+     * @brief 返回是否可以停止
+     */
+	virtual bool stopping();
+	
+	virtual void idle();
+protected:
+	/**
+	 * @brief 协程调度函数
+	 */
+    void run();
+    /**
+     * @brief 设置当前的协程调度器
+     */
+    void setThis();
 private:
 	template <class FiberOrCb>
 	bool scheduleNoLock(FiberOrCb fc, int thread) {
@@ -140,6 +153,15 @@ private:
 	std::vector<Thread::ptr> m_threads; /// 线程池
 	std::list<FiberAndThread> m_fibers; /// 待执行的任务队列
 	std::string m_name;                 /// 协程调度器名称
+	Fiber::ptr m_rootFiber;             /// 主协程
+protected:
+	std::vector<int> m_threadIds;       /// 线程id列表
+	size_t m_threadCount = 0;           /// 线程数量
+	size_t m_activeThreadCount = 0;     /// 活跃线程数量
+	size_t m_idleThreadCount = 0;       /// 空闲线程数量
+	bool m_stopping = true;             /// 是否正在停止
+	bool m_autostop = false;            /// 是否自动停止
+	int m_rootThread = 0;               /// 主线程id(use_caller)
 };
 } // namespace sylar
 
