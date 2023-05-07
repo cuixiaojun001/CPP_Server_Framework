@@ -1,14 +1,16 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-29 17:58:44
- * @LastEditTime: 2023-05-03 10:36:09
+ * @LastEditTime: 2023-05-07 22:43:49
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
 #include "util.h"
-#include <execinfo.h>
 #include "log.h"
 #include "fiber.h"
+
+#include <execinfo.h>
+#include <sys/time.h>
 
 namespace sylar {
 sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
@@ -44,6 +46,13 @@ std::string BacktraceToString(int size, int skip, const std::string& prefix) {
         ss << prefix << bt[i] << std::endl;
     }
     return ss.str();
+}
+
+
+uint64_t GetCurrentMs() { 
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000ul  + tv.tv_usec / 1000;
 }
 
 }

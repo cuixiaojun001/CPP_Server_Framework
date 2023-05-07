@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-28 23:41:11
- * @LastEditTime: 2023-05-03 20:08:12
+ * @LastEditTime: 2023-05-07 16:48:38
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -11,7 +11,7 @@
     
 namespace sylar {
 static thread_local Thread* t_thread = nullptr;
-static thread_local std::string t_thread_name = "UNKNOW";
+static thread_local std::string t_thread_name = "MainThread";
 static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
 Thread* Thread::GetThis() { return t_thread; }

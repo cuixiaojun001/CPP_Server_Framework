@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-30 21:13:02
- * @LastEditTime: 2023-05-04 23:22:46
+ * @LastEditTime: 2023-05-07 15:58:59
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -46,7 +46,7 @@ Fiber::Fiber() {
     }
 
     ++s_fiber_count;
-    SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber() mainFiber" << " total=" << s_fiber_count;
+    SYLAR_LOG_DEBUG(g_logger) << "Fiber::Fiber() 创建主协程" << " total=" << s_fiber_count;
 }
 
 Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool run_in_scheduler)
@@ -146,6 +146,7 @@ void Fiber::MainFunc() {
 }
 
 /*----------------普通类成员函数----------------*/
+
 void Fiber::reset(std::function<void()> cb) {
     SYLAR_ASSERT1(m_stack);
     SYLAR_ASSERT1(m_state == TERM || m_state == INIT || m_state == EXCEPT);
@@ -163,8 +164,8 @@ void Fiber::reset(std::function<void()> cb) {
 void Fiber::swapIn() {
     SetThis(this);
     SYLAR_ASSERT1(m_state != EXEC);
-    m_state = EXEC;
-    if (m_runInScheduler) {
+	m_state = EXEC;
+	if (m_runInScheduler) {
         if (swapcontext(&(Scheduler::GetMainFiber()->m_ctx), &m_ctx)) {
             SYLAR_ASSERT2(false, "swapcontext");
         }
@@ -176,16 +177,17 @@ void Fiber::swapIn() {
 	
 }
 void Fiber::swapOut() {
-    SetThis(t_thread_fiber.get());
-    if (m_runInScheduler) {
+	SetThis(t_thread_fiber.get());
+	if (m_runInScheduler) {
         if (swapcontext(&m_ctx, &(Scheduler::GetMainFiber()->m_ctx))) {
             SYLAR_ASSERT2(false, "swapcontext");
         }
     } else {
-        if (swapcontext(&m_ctx, &t_thread_fiber->m_ctx)) {
-            SYLAR_ASSERT2(false, "swapcontext");
-        }
-    }
+		SYLAR_LOG_DEBUG(g_logger) << "主协程id: " << t_thread_fiber->m_id << " 主协程上下文: " << &t_thread_fiber->m_ctx;
+		if (swapcontext(&m_ctx, &t_thread_fiber->m_ctx)) {
+			SYLAR_ASSERT2(false, "swapcontext");
+		}
+	}
 }
 
 uint64_t Fiber::GetFiberId() {

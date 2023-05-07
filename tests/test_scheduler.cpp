@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-05-04 11:54:07
- * @LastEditTime: 2023-05-05 00:19:59
+ * @LastEditTime: 2023-05-06 21:19:29
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -10,19 +10,18 @@
 static sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
 void test_fiber() {
 	SYLAR_LOG_INFO(g_logger) << "test in fiber";
-	static int s_count = 5;
-	sleep(1);
-	while(--s_count >= 0) {
-		sylar::Scheduler::GetThis()->schedule(&test_fiber);
-	}
 }
 int main(int argc, char const* argv[]) {
 	SYLAR_LOG_INFO(g_logger) << "main begin";
-	sylar::Scheduler sc(2, false, "thr");
+	sylar::Scheduler sc(1, true, "thr");
+	int n = 2;
+	while (n --) {
+		SYLAR_LOG_INFO(g_logger) << "向任务队列中添加任务...";
+		sc.schedule(&test_fiber);
+	}
 	sc.start();
-	sc.schedule(&test_fiber);
 	SYLAR_LOG_INFO(g_logger) << "scheduler";
-	sc.stop();
+	// sc.stop();
 	SYLAR_LOG_INFO(g_logger) << "main over";
 	return 0;
 }

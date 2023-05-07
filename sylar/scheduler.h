@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-05-03 20:22:44
- * @LastEditTime: 2023-05-04 11:11:46
+ * @LastEditTime: 2023-05-08 00:00:50
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -26,7 +26,7 @@ public:
 	 * @param[in] use_caller 是否使用当前调用线程
 	 * @param[in] name 协程调度器名称
 	 */
-	Scheduler(size_t threads = 1, bool use_caller = true, const std::string& name = "");
+	Scheduler(size_t threads = 1, bool use_caller = true, const std::string& name = "SchedulerThread");
 	virtual ~Scheduler();
 
 public:
@@ -35,6 +35,7 @@ public:
 
 public:
 	const std::string& getName() const { return m_name; }
+	bool hasIdleThreads() { return m_idleThreadCount > 0; }
 
 public:
 	void start();
@@ -56,7 +57,8 @@ public:
 		{
 			MutexType::Lock lock(m_mutex);
 			while (begin != end) {
-				need_tickle = scheduleNoLock(*begin) || need_tickle; // 循环向任务队列中添加任务
+				need_tickle = scheduleNoLock(&*begin, -1) || need_tickle; // 循环向任务队列中添加任务
+				++begin;
 			}
 		}
 		if (need_tickle) {

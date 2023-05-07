@@ -21,6 +21,8 @@ set(LIB_SRC
     sylar/mutex.cpp
     sylar/fiber.cpp
     sylar/scheduler.cpp
+    sylar/iomanager.cpp
+    sylar/timer.cpp
     )
 
 add_library(sylar SHARED ${LIB_SRC})
@@ -54,20 +56,25 @@ set(LIB_LIB
 # force_redefine_file_macro_for_sources(test_atomic) #__FILE__
 # target_link_libraries(test_atomic sylar ${LIB_LIB})
 
-add_executable(test_util tests/test_util.cpp)
-add_dependencies(test_util sylar)
-force_redefine_file_macro_for_sources(test_util) #__FILE__
-target_link_libraries(test_util sylar ${LIB_LIB})
+# add_executable(test_util tests/test_util.cpp)
+# add_dependencies(test_util sylar)
+# force_redefine_file_macro_for_sources(test_util) #__FILE__
+# target_link_libraries(test_util sylar ${LIB_LIB})
 
-add_executable(test_fiber tests/test_fiber.cpp)
-add_dependencies(test_fiber sylar)
-force_redefine_file_macro_for_sources(test_fiber) #__FILE__
-target_link_libraries(test_fiber sylar ${LIB_LIB})
+# add_executable(test_fiber tests/test_fiber.cpp)
+# add_dependencies(test_fiber sylar)
+# force_redefine_file_macro_for_sources(test_fiber) #__FILE__
+# target_link_libraries(test_fiber sylar ${LIB_LIB})
 
 add_executable(test_scheduler tests/test_scheduler.cpp)
 add_dependencies(test_scheduler sylar)
 force_redefine_file_macro_for_sources(test_scheduler) #__FILE__
 target_link_libraries(test_scheduler sylar ${LIB_LIB})
+
+add_executable(test_iomanager tests/test_iomanager.cpp)
+add_dependencies(test_iomanager sylar)
+force_redefine_file_macro_for_sources(test_iomanager) #__FILE__
+target_link_libraries(test_iomanager sylar ${LIB_LIB})
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

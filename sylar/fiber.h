@@ -2,7 +2,7 @@
  * @brief 协程封装
  * @Author: Cui XiaoJun
  * @Date: 2023-04-30 21:12:53
- * @LastEditTime: 2023-05-04 21:59:59
+ * @LastEditTime: 2023-05-05 20:13:42
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -41,7 +41,7 @@ public:
 	 * @brief 构造函数
 	 * @param[in] cb 协程执行的函数
 	 * @param[in] stacksize 协程栈大小
-	 * @param[in] use_caller 是否在MainFiber上调度
+	 * @param[in] run_in_scheduler 是否参与调度
 	 */
 	Fiber(std::function<void()> cb, size_t stacksize = 0, bool run_in_scheduler = false);
 	~Fiber();
