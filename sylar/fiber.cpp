@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-30 21:13:02
- * @LastEditTime: 2023-05-07 15:58:59
+ * @LastEditTime: 2023-05-09 13:59:20
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -114,8 +114,9 @@ void Fiber::YieldToReady() {
 
 void Fiber::YieldToHold() {
     Fiber::ptr cur = GetThis();
-    cur->m_state = HOLD;
-    cur->swapOut();
+	SYLAR_ASSERT1(cur->m_state == EXEC);
+	// cur->m_state = HOLD;
+	cur->swapOut();
 }
 
 uint64_t Fiber::TotalFibers() {
@@ -127,7 +128,7 @@ void Fiber::MainFunc() {
 	SYLAR_ASSERT1(cur);
 	try
     {
-        cur->m_cb();
+        cur->m_cb();    
         cur->m_cb = nullptr;
         cur->m_state = TERM;
     } catch(const std::exception& e)

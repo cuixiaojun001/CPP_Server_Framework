@@ -6,7 +6,7 @@
         "name": "(gdb) Launch",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/bin/test_scheduler",
+        "program": "${workspaceFolder}/bin/test_hook",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",

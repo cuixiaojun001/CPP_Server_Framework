@@ -1,13 +1,14 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-05-03 20:23:05
- * @LastEditTime: 2023-05-07 17:13:35
+ * @LastEditTime: 2023-05-09 14:15:51
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
 #include "scheduler.h"
 #include "log.h"
 #include "macro.h"
+#include "hook.h"
 
 namespace sylar {
 /*-----------全局变量-----------*/
@@ -37,6 +38,7 @@ Scheduler::Scheduler(size_t threads /*=1*/, bool use_caller /*=true*/, const std
 	m_threadCount = threads;
 }
 Scheduler::~Scheduler() {
+	SYLAR_LOG_DEBUG(g_logger) << "Scheduler::~Scheduler()";
 	SYLAR_ASSERT1(m_stopping);
 	if (GetThis() == this) {
 		t_scheduler = nullptr;
@@ -71,8 +73,8 @@ void Scheduler::stop() {
 	if (m_rootFiber && m_threadCount == 0 && (m_rootFiber->getState() == Fiber::TERM || m_rootFiber->getState() == Fiber::INIT)) {
 		SYLAR_LOG_INFO(g_logger) << this << "stopped";
 		m_stopping = true;
-
 		if (stopping()) {
+			SYLAR_LOG_INFO(g_logger) << "当前没有任何任务未完成, 退出调度器, 程序走向结束";
 			return;
 		}
 	}
@@ -92,6 +94,7 @@ void Scheduler::stop() {
 	}
 
 	if (m_rootFiber) {
+		SYLAR_LOG_DEBUG(g_logger) << "use_caller = true threadCount = 1, caller线程开始调度";
 		m_rootFiber->swapIn(); // 调度线程只有caller线程, swapIn() 进入调度协程
 	}
 
@@ -106,11 +109,13 @@ void Scheduler::stop() {
 
 	if (stopping())
 		return;
+	SYLAR_LOG_DEBUG(g_logger) << "Scheduler::stop() end";
 }
 
 /*-----------保护成员方法-----------*/
 void Scheduler::run() { // 执行调度
 	SYLAR_LOG_INFO(g_logger) << "run()";
+	set_hook_enable(true); // 调度线程开启hook
 	setThis();
 	if (sylar::GetThreadId() != m_rootThread) {                                    // 当前线程不是调度线程
 		t_scheduler_fiber = Fiber::GetThis().get();                                // 调度协程等于当前协程
@@ -151,6 +156,7 @@ void Scheduler::run() { // 执行调度
 			++m_activeThreadCount;
 			ft.fiber->swapIn();
 			--m_activeThreadCount;
+			SYLAR_LOG_DEBUG(g_logger) << "当前协程任务执行完毕";
 			// if (ft.fiber->getState() == Fiber::READY) {
 			// 	// 协程状态为可执行状态
 			// 	schedule(ft.fiber);
@@ -161,16 +167,18 @@ void Scheduler::run() { // 执行调度
 			ft.reset();
 		} else if (ft.cb) {                                 // 调度任务为函数
 			if (cb_fiber) {
-				cb_fiber->reset(ft.cb);                     // 封装函数为协程
+				SYLAR_LOG_DEBUG(g_logger) << "cb_fiber 存在";
+				cb_fiber->reset(ft.cb); // 封装函数为协程
 			} else {
+				SYLAR_LOG_DEBUG(g_logger) << "cb_fiber 不存在";
 				cb_fiber.reset(new Fiber(ft.cb, 0, true)); // 封装函数为协程
 			}
 			ft.reset();
 			++m_activeThreadCount;
 			cb_fiber->swapIn();
 			--m_activeThreadCount;
-			SYLAR_LOG_DEBUG(g_logger) << "当前任务执行完毕, 销毁协程";
-			// cb_fiber.reset(); // 删掉该任务协程
+			SYLAR_LOG_DEBUG(g_logger) << "当前函数任务执行完毕";
+			cb_fiber.reset(); // 删掉该任务协程
 			// if (cb_fiber->getState() == Fiber::READY) {
 			// 	schedule(cb_fiber);
 			// 	cb_fiber.reset();
@@ -181,7 +189,7 @@ void Scheduler::run() { // 执行调度
 			// 	cb_fiber.reset();
 			// }
 		} else { // 没有调度任务
-			switch (idle_fiber->getState())
+			/* switch (idle_fiber->getState())
 			{
 			case Fiber::TERM:
 				SYLAR_LOG_DEBUG(g_logger) << "当前没有调度任务, idle协程状态为 TERM";
@@ -198,7 +206,7 @@ void Scheduler::run() { // 执行调度
 			default:
 				SYLAR_LOG_DEBUG(g_logger) << "当前没有调度任务, idle协程状态为 UNKNOWN";
 				break;
-			}
+			} */
 			if (idle_fiber->getState() == Fiber::TERM) {
 				SYLAR_LOG_INFO(g_logger) << "idle_fiber TREM 当前无任务";
 				break;

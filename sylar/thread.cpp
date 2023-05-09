@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-28 23:41:11
- * @LastEditTime: 2023-05-07 16:48:38
+ * @LastEditTime: 2023-05-09 09:04:25
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -65,7 +65,7 @@ void* Thread::run(void* arg) {
     pthread_setname_np(pthread_self(), thread->m_name.substr(0, 15).c_str());
     std::function<void()> cb;
     cb.swap(thread->m_cb);
-
+    
     thread->m_semaphore.notify();
     cb();
     return 0;

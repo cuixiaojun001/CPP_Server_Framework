@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-04-29 17:58:44
- * @LastEditTime: 2023-05-08 00:04:58
+ * @LastEditTime: 2023-05-08 22:17:22
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -19,5 +19,7 @@
 #include "scheduler.h"
 #include "iomanager.h"
 #include "timer.h"
+#include "fd_manager.h"
+#include "hook.h"
 
 #endif //__SYLAR_H__

@@ -57,6 +57,12 @@ private:
 	};
 
 public:
+	/**
+	 * @brief IOManager构造函数
+	 * @param[in] threads 线程池线程数
+	 * @param use_caller 当前线程是否参与调度
+	 * @param name 调度器名称
+	 */
 	IOManager(size_t threads = 1, bool use_caller = true, const std::string& name = "SchedulerThread");
 	~IOManager();
 

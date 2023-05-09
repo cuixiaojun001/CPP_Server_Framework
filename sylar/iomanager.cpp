@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-05-07 10:31:32
- * @LastEditTime: 2023-05-07 23:56:03
+ * @LastEditTime: 2023-05-09 13:54:41
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -255,9 +255,9 @@ IOManager* IOManager::GetThis() {
 }
 
 void IOManager::tickle() {
-    SYLAR_LOG_DEBUG(g_logger) << "新任务被加入, tickle调度协程";
+    // SYLAR_LOG_DEBUG(g_logger) << "任务列表原先为空, 添加新任务, tickle调度协程";
 	if (!hasIdleThreads()) {
-		SYLAR_LOG_DEBUG(g_logger) << "当前线程没有idle协程";
+		// SYLAR_LOG_DEBUG(g_logger) << "当前线程没有idle协程";
 		return;
 	}
     SYLAR_LOG_DEBUG(g_logger) << "新任务被加入, write pipe";
