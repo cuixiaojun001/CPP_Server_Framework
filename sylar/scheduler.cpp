@@ -1,7 +1,7 @@
 /*
  * @Author: Cui XiaoJun
  * @Date: 2023-05-03 20:23:05
- * @LastEditTime: 2023-05-09 14:15:51
+ * @LastEditTime: 2023-05-09 15:03:57
  * @email: cxj2856801855@gmail.com
  * @github: https://github.com/SocialistYouth/
  */
@@ -178,16 +178,16 @@ void Scheduler::run() { // 执行调度
 			cb_fiber->swapIn();
 			--m_activeThreadCount;
 			SYLAR_LOG_DEBUG(g_logger) << "当前函数任务执行完毕";
-			cb_fiber.reset(); // 删掉该任务协程
-			// if (cb_fiber->getState() == Fiber::READY) {
-			// 	schedule(cb_fiber);
-			// 	cb_fiber.reset();
-			// } else if (cb_fiber->getState() == Fiber::EXCEPT || cb_fiber->getState() == Fiber::TERM) {
-			// 	cb_fiber->reset(nullptr);
-			// } else { // if(cb_fiber->getState() != Fiber::TERM) {
-			// 	cb_fiber->m_state = Fiber::HOLD;
-			// 	cb_fiber.reset();
-			// }
+			// cb_fiber.reset(); // 删掉该任务协程
+			if (cb_fiber->getState() == Fiber::READY) {
+				schedule(cb_fiber);
+				cb_fiber.reset();
+			} else if (cb_fiber->getState() == Fiber::EXCEPT || cb_fiber->getState() == Fiber::TERM) {
+				cb_fiber->reset(nullptr);
+			} else { // if(cb_fiber->getState() != Fiber::TERM) {
+				cb_fiber->m_state = Fiber::HOLD;
+				cb_fiber.reset();
+			}
 		} else { // 没有调度任务
 			/* switch (idle_fiber->getState())
 			{
